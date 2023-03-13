@@ -1,3 +1,4 @@
+import { selectFilter } from '../../redux/selectors';
 import {
   default as PropTypes,
   Button,
@@ -5,20 +6,40 @@ import {
   ListItem,
   RiContactsLine,
   RiDeleteBin6Line,
-  useDispatch,
   useSelector,
 } from '../../components';
-import { deleteContact } from '../../redux/operations';
-import { selectFilteredList } from '../../redux/selectors';
+import {
+  useFetchAllQuery,
+  useDeleteContactMutation,
+} from '../../redux/contactAPI';
 
 const ContactList = () => {
-  const dispatch = useDispatch();
-  const filteredList = useSelector(selectFilteredList);
+  const filterValue = useSelector(selectFilter);
+  const { data: contacts = [], isError: fetchError } = useFetchAllQuery();
 
+  const filteredList = () => {
+    try {
+      const loweredFilter = filterValue.toLowerCase();
+      return contacts.filter(({ name }) =>
+        name.toLowerCase().includes(loweredFilter)
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const [deleteContact, { isError: deleteError }] = useDeleteContactMutation();
   return (
     <>
       <List>
-        {filteredList.map(({ name, id, number }) => {
+        {fetchError ||
+          (deleteError && (
+            <div style={{ color: 'red' }}>
+              <p>Oooops ...</p>
+              <p>Error ...</p>
+            </div>
+          ))}
+        {filteredList().map(({ name, id, number }) => {
           return (
             name && (
               <ListItem key={id}>
@@ -27,7 +48,7 @@ const ContactList = () => {
                 </div>
                 <Button
                   onClick={() => {
-                    dispatch(deleteContact(id));
+                    deleteContact(id);
                   }}
                 >
                   <RiDeleteBin6Line

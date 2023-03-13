@@ -6,23 +6,22 @@ import {
   Label,
   BsFillTelephonePlusFill,
   useState,
-  useDispatch,
-  useSelector,
 } from '../../components';
-import { addContact } from '../../redux/operations';
-import { selectContacts } from '../../redux/selectors';
+
+import {
+  useFetchAllQuery,
+  usePostContactMutation,
+} from '../../redux/contactAPI';
 
 const ContactForm = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-  const dispatch = useDispatch();
-  const contacts = useSelector(selectContacts);
-
+  const { data: contacts } = useFetchAllQuery();
   const inputChange = ({ target }) => {
     if (target.name === 'name') return setName(target.value);
     setNumber(target.value);
   };
-
+  const [postContact] = usePostContactMutation();
   return (
     <Form
       color="#ffee7d"
@@ -30,7 +29,8 @@ const ContactForm = () => {
         e.preventDefault();
         contacts.find(obj => obj.name === name)
           ? alert(`${name} is already in contacts`)
-          : dispatch(addContact({ name, number }));
+          : postContact({ name, number });
+
         setName('');
         setNumber('');
       }}

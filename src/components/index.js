@@ -12,4 +12,3 @@ export { Input } from './Input.styled';
 export { Label } from './ContactForm/Label.styled';
 
 export { setFilterValue } from '../redux/filterSlice';
-// export { deleteContact, addContact } from '../redux/contactSlice';
