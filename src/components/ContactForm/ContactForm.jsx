@@ -21,18 +21,28 @@ const ContactForm = () => {
     if (target.name === 'name') return setName(target.value);
     setNumber(target.value);
   };
-  const [postContact] = usePostContactMutation();
+
+  const [postContact, { isLoading }] = usePostContactMutation();
   return (
     <Form
       color="#ffee7d"
       onSubmit={e => {
         e.preventDefault();
-        contacts.find(obj => obj.name === name)
-          ? alert(`${name} is already in contacts`)
-          : postContact({ name, number });
+        if (contacts.find(obj => obj.name === name)) {
+          alert(`${name} is already in contacts`);
+        } else {
+          const fn = async () => {
+            const postResult = await postContact({ name, number });
 
-        setName('');
-        setNumber('');
+            if (postResult?.error) {
+              alert('Ooops ... You have some problems with adding contact((');
+            } else {
+              setName('');
+              setNumber('');
+            }
+          };
+          fn();
+        }
       }}
     >
       <Label>
@@ -61,7 +71,7 @@ const ContactForm = () => {
       </Label>
       <Button type="submit">
         {' '}
-        <BsFillTelephonePlusFill /> Add contacts
+        <BsFillTelephonePlusFill /> {isLoading ? 'Loading ...' : 'Add contacts'}
       </Button>
     </Form>
   );
